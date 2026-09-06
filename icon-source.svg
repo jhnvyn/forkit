@@ -1,0 +1,27 @@
+<svg width="512" height="512" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bgGrad" x1="0" y1="0" x2="512" y2="512" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#1D1B20"/>
+      <stop offset="1" stop-color="#131218"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="0.18" cy="0.12" r="0.55">
+      <stop offset="0" stop-color="#C7511F" stop-opacity="0.55"/>
+      <stop offset="1" stop-color="#C7511F" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="forkGrad" x1="0" y1="0" x2="0" y2="512" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#F5F1E8"/>
+      <stop offset="1" stop-color="#E8703C"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="512" height="512" rx="112" fill="url(#bgGrad)"/>
+  <rect width="512" height="512" rx="112" fill="url(#glow)"/>
+
+  <g transform="translate(146, 76)" stroke-linecap="round" fill="none">
+    <path d="M0 0v142a28 28 0 0 0 28 28" stroke="url(#forkGrad)" stroke-width="30"/>
+    <path d="M71 0v142a28 28 0 0 1 -28 28" stroke="url(#forkGrad)" stroke-width="30"/>
+    <path d="M35.5 0v170" stroke="url(#forkGrad)" stroke-width="30"/>
+    <path d="M35.5 170 L35.5 270 Q35.5 340 106 340" stroke="url(#forkGrad)" stroke-width="30"/>
+  </g>
+  <circle cx="252" cy="416" r="32" fill="#C7511F"/>
+</svg>

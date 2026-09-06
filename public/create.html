@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="manifest" href="/manifest.json" />
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+  <link rel="icon" href="/favicon.png" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Forkit" />
+  <meta name="theme-color" content="#17161A" />
+<title>Forkit — review split</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap');
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Inter', sans-serif; background: #17161A; min-height: 100vh; display: flex; justify-content: center; padding: 40px 16px; color: #F5F1E8; position: relative; overflow-x: hidden; }
+  .card { width: 100%; max-width: 420px; background: #201F1C; border-radius: 20px; box-shadow: 0 20px 50px rgba(0,0,0,0.4); padding: 24px; border: 1px solid rgba(255,255,255,0.06); position: relative; z-index: 1; }
+  .logo { font-family: 'JetBrains Mono', monospace; font-weight: 700; font-size: 16px; color: #9C9587; margin-bottom: 18px; }
+  .logo span { color: #C7511F; }
+  h1 { font-size: 18px; margin-bottom: 4px; color: #F5F1E8; }
+  .sub { font-size: 13px; color: #9C9587; margin-bottom: 18px; }
+  .scan-banner { background: rgba(111,207,151,0.12); border: 1px solid rgba(111,207,151,0.25); border-radius: 10px; padding: 10px 12px; font-size: 12.5px; color: #6FCF97; font-weight: 600; margin-bottom: 16px; display: none; }
+  label { font-size: 12.5px; font-weight: 600; color: #C9C2B3; display: block; margin: 12px 0 5px; }
+  input { width: 100%; border: 1.5px solid rgba(255,255,255,0.12); border-radius: 10px; padding: 10px 12px; font-size: 14px; font-family: 'Inter', sans-serif; background: rgba(255,255,255,0.04); color: #F5F1E8; outline: none; }
+  input::placeholder { color: #6B6759; }
+  input:focus { border-color: #C7511F; }
+  .item-row { display: flex; gap: 8px; margin-bottom: 8px; }
+  .item-row input.item-name { flex: 1; min-width: 0; }
+  .item-row input.item-price { width: 90px; flex-shrink: 0; }
+  .remove-btn { background: none; border: none; color: #E08A6B; font-size: 18px; cursor: pointer; padding: 0 6px; }
+  .add-btn { font-size: 13px; font-weight: 600; color: #E8703C; background: none; border: none; cursor: pointer; padding: 6px 0; }
+  .btn { width: 100%; background: linear-gradient(90deg, #C7511F, #E8703C); color: #fff; border: none; border-radius: 999px; padding: 14px; font-size: 15px; font-weight: 700; cursor: pointer; margin-top: 18px; transition: transform 0.12s ease; }
+  .btn:active { transform: scale(0.98); }
+  .btn:disabled { opacity: 0.4; }
+  .section-title { font-size: 11px; text-transform: lowercase; color: #6B6759; margin-top: 20px; letter-spacing: 0.02em; }
+  .rescan-link { font-size: 12px; color: #9C9587; text-decoration: underline; cursor: pointer; background: none; border: none; font-family: 'Inter', sans-serif; }
+  @keyframes drift {
+    0%   { transform: translate(0px, 0px) scale(1); }
+    50%  { transform: translate(24px, 28px) scale(1.08); }
+    100% { transform: translate(-16px, -12px) scale(0.95); }
+  }
+  .glow { position: fixed; border-radius: 50%; filter: blur(70px); pointer-events: none; z-index: 0; }
+  .glow-1 { width: 512px; height: 512px; top: -100px; right: -100px; background: radial-gradient(circle, #C7511F 0%, transparent 70%); opacity: 0.55; animation: drift 22s ease-in-out infinite alternate; }
+  .glow-2 { width: 448px; height: 448px; bottom: -80px; left: -100px; background: radial-gradient(circle, #8E5FB0 0%, transparent 70%); opacity: 0.35; animation: drift 27s ease-in-out infinite alternate-reverse; }
+</style>
+</head>
+<body>
+  <div class="glow glow-1"></div>
+  <div class="glow glow-2"></div>
+  <div class="card">
+    <div class="logo" style="display:flex; justify-content:space-between; align-items:center;">
+      <span>fork<span style="color:#C7511F">it</span></span>
+      <a href="/history.html" style="font-size:11px; font-weight:700; color:#E8703C; text-decoration:none; letter-spacing:0.02em;">MY SPLITS →</a>
+    </div>
+    <h1>Review your split</h1>
+    <div class="sub">Double-check what we found, then send it to the group.</div>
+
+    <div class="scan-banner" id="scanBanner"></div>
+    <div id="rawTextPanel" style="display:none; margin-bottom:16px; padding:12px; background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.1); border-radius:10px; font-size:11.5px; color:#9C9587; white-space:pre-wrap; max-height:160px; overflow-y:auto; font-family:'JetBrains Mono',monospace;"></div>
+
+    <label>Restaurant / place</label>
+    <input id="restaurant" placeholder="Luigi's Trattoria" />
+
+    <label>Your name</label>
+    <input id="payerName" placeholder="Sam" />
+
+    <div class="section-title">how they'll pay you back</div>
+    <label>Venmo username (optional)</label>
+    <input id="payerVenmo" placeholder="SamOrtiz" />
+    <label>PayPal.me username (optional)</label>
+    <input id="payerPaypal" placeholder="samortiz" />
+    <label>Phone (optional, for text/Zelle)</label>
+    <input id="payerPhone" placeholder="+1 555 123 4567" />
+
+    <div class="section-title" style="display:flex; justify-content:space-between; align-items:center;">
+      <span>items</span>
+      <button class="rescan-link" onclick="window.location.href='/scan.html'">rescan a receipt</button>
+    </div>
+    <div id="items"></div>
+    <button class="add-btn" onclick="addItem()">+ add item</button>
+
+    <label>Tax &amp; tip (total $)</label>
+    <input id="taxTip" type="number" step="0.01" placeholder="12.90" />
+
+    <button class="btn" id="submitBtn" onclick="createSplit()">Generate split link</button>
+  </div>
+
+  <script>
+    // Prefill from saved name + any payment info remembered from last time
+    const savedName = localStorage.getItem('split_user_name');
+    if (savedName) document.getElementById('payerName').value = savedName;
+    ['payerVenmo', 'payerPaypal', 'payerPhone'].forEach(id => {
+      const saved = localStorage.getItem('split_' + id);
+      if (saved) document.getElementById(id).value = saved;
+    });
+
+    const itemsEl = document.getElementById('items');
+
+    function addItem(name = '', price = '') {
+      const row = document.createElement('div');
+      row.className = 'item-row';
+      row.innerHTML = `
+        <input class="item-name" placeholder="Item name" value="${name}" />
+        <input class="item-price" type="number" step="0.01" placeholder="0.00" value="${price}" />
+        <button class="remove-btn" onclick="this.parentElement.remove()">×</button>
+      `;
+      itemsEl.appendChild(row);
+    }
+
+    // Load whatever the scan screen found, if anything — wrapped defensively
+    // so a bad or partial scan can never leave the page with no item rows.
+    let scannedItemCount = 0;
+    try {
+      const scanResultRaw = sessionStorage.getItem('scan_result');
+      if (scanResultRaw) {
+        const scanResult = JSON.parse(scanResultRaw);
+
+        if (scanResult.restaurantName && typeof scanResult.restaurantName === 'string') {
+          document.getElementById('restaurant').value = scanResult.restaurantName;
+        }
+        if (scanResult.taxTip != null && !isNaN(scanResult.taxTip)) {
+          document.getElementById('taxTip').value = Number(scanResult.taxTip).toFixed(2);
+        }
+
+        const validItems = (scanResult.items || []).filter(
+          item => item && item.name && !isNaN(parseFloat(item.price)) && parseFloat(item.price) > 0
+        );
+        validItems.forEach(item => addItem(item.name, parseFloat(item.price).toFixed(2)));
+        scannedItemCount = validItems.length;
+
+        if (scannedItemCount > 0) {
+          const banner = document.getElementById('scanBanner');
+          banner.style.display = 'block';
+          banner.textContent = `Filled in ${scannedItemCount} item${scannedItemCount === 1 ? '' : 's'} from your scan — check them over below`;
+        } else if (scanResult.rawText && scanResult.rawText.trim()) {
+          const banner = document.getElementById('scanBanner');
+          banner.style.display = 'block';
+          banner.style.background = 'rgba(224,138,107,0.12)';
+          banner.style.borderColor = 'rgba(224,138,107,0.3)';
+          banner.style.color = '#E08A6B';
+          banner.textContent = "Couldn't auto-detect items — here's what we read, so you can copy prices in below";
+
+          const panel = document.getElementById('rawTextPanel');
+          panel.style.display = 'block';
+          panel.textContent = scanResult.rawText.trim();
+        }
+
+        sessionStorage.removeItem('scan_result');
+      }
+    } catch (e) {
+      // Bad scan data — fall through to empty manual-entry rows below
+    }
+
+    // Always leave at least one empty row to add to
+    if (itemsEl.children.length === 0) {
+      addItem(); addItem(); addItem();
+    } else {
+      addItem();
+    }
+
+    async function createSplit() {
+      const restaurantName = document.getElementById('restaurant').value.trim();
+      const payerName = document.getElementById('payerName').value.trim();
+      const payerVenmo = document.getElementById('payerVenmo').value.trim();
+      const payerPaypal = document.getElementById('payerPaypal').value.trim();
+      const payerPhone = document.getElementById('payerPhone').value.trim();
+      const taxTip = parseFloat(document.getElementById('taxTip').value) || 0;
+
+      const items = Array.from(document.querySelectorAll('.item-row')).map(row => ({
+        name: row.querySelector('.item-name').value.trim(),
+        price: parseFloat(row.querySelector('.item-price').value) || 0,
+      })).filter(i => i.name && i.price > 0);
+
+      if (!restaurantName || !payerName || items.length === 0) {
+        alert('Add a restaurant name, your name, and at least one item with a price.');
+        return;
+      }
+
+      const btn = document.getElementById('submitBtn');
+      btn.disabled = true;
+      btn.textContent = 'Creating…';
+
+      try {
+        const res = await fetch('/api/splits', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ restaurantName, payerName, payerVenmo, payerPaypal, payerPhone, items, taxTip }),
+        });
+        const data = await res.json();
+
+        // Remember payment info for next time so they don't retype it
+        if (payerVenmo) localStorage.setItem('split_payerVenmo', payerVenmo);
+        if (payerPaypal) localStorage.setItem('split_payerPaypal', payerPaypal);
+        if (payerPhone) localStorage.setItem('split_payerPhone', payerPhone);
+
+        window.location.href = '/pending.html?id=' + data.id;
+      } catch (e) {
+        alert('Something went wrong creating the split.');
+        btn.disabled = false;
+        btn.textContent = 'Generate split link';
+      }
+    }
+  </script>
+</body>
+</html>

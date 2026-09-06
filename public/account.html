@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="manifest" href="/manifest.json" />
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+  <link rel="icon" href="/favicon.png" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Forkit" />
+  <meta name="theme-color" content="#17161A" />
+<title>Forkit — account</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap');
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Inter', sans-serif; background: #17161A; min-height: 100vh;
+    display: flex; justify-content: center; color: #F5F1E8;
+    position: relative; overflow-x: hidden;
+  }
+    @keyframes drift {
+    0%   { transform: translate(0px, 0px) scale(1); }
+    50%  { transform: translate(24px, 28px) scale(1.08); }
+    100% { transform: translate(-16px, -12px) scale(0.95); }
+  }
+  .glow { position: fixed; border-radius: 50%; filter: blur(70px); pointer-events: none; z-index: 0; }
+  .glow-1 { width: 480px; height: 480px; top: -100px; right: -100px; background: radial-gradient(circle, #C7511F 0%, transparent 70%); opacity: 0.55; animation: drift 22s ease-in-out infinite alternate; }
+
+  .wrap { width: 100%; max-width: 420px; position: relative; z-index: 1; padding: 40px 16px 100px; }
+  .logo { font-family: 'JetBrains Mono', monospace; font-weight: 700; font-size: 17px; color: #F5F1E8; margin-bottom: 6px; }
+  .logo span { color: #C7511F; }
+  h1 { font-size: 19px; margin: 14px 0 4px; }
+  .sub { font-size: 13px; color: #9C9587; margin-bottom: 22px; }
+
+  .profile-header { display: flex; align-items: center; gap: 14px; margin-bottom: 26px; }
+  .profile-avatar { width: 58px; height: 58px; border-radius: 50%; background: #2F6F4E; display: flex; align-items: center; justify-content: center; font-size: 20px; font-weight: 700; color: #fff; }
+  .profile-name { font-size: 17px; font-weight: 700; }
+  .profile-sub { font-size: 12px; color: #6B6759; margin-top: 2px; }
+
+  .section-title { font-size: 11px; text-transform: lowercase; color: #6B6759; margin: 22px 0 8px; letter-spacing: 0.03em; }
+  label { font-size: 12.5px; font-weight: 600; color: #C9C2B3; display: block; margin: 12px 0 5px; }
+  input { width: 100%; border: 1.5px solid rgba(255,255,255,0.12); border-radius: 10px; padding: 11px 12px; font-size: 14px; font-family: 'Inter', sans-serif; background: rgba(255,255,255,0.04); color: #F5F1E8; outline: none; }
+  input::placeholder { color: #6B6759; }
+  input:focus { border-color: #C7511F; }
+
+  .btn { width: 100%; background: linear-gradient(90deg, #C7511F, #E8703C); color: #fff; border: none; border-radius: 999px; padding: 14px; font-size: 15px; font-weight: 700; cursor: pointer; margin-top: 20px; transition: transform 0.12s ease; }
+  .btn:active { transform: scale(0.98); }
+  .saved-note { text-align: center; font-size: 12px; color: #6FCF97; margin-top: 10px; opacity: 0; transition: opacity 0.3s ease; }
+  .saved-note.show { opacity: 1; }
+
+  .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; display: flex; justify-content: center; background: rgba(23,22,26,0.92); backdrop-filter: blur(14px); border-top: 1px solid rgba(255,255,255,0.08); z-index: 10; }
+  .nav-inner { width: 100%; max-width: 420px; display: flex; align-items: center; justify-content: space-around; padding: 10px 12px calc(10px + env(safe-area-inset-bottom)); }
+  .nav-item { display: flex; flex-direction: column; align-items: center; gap: 3px; text-decoration: none; color: #6B6759; font-size: 10.5px; font-weight: 600; flex: 1; padding: 4px 0; }
+  .nav-item.active { color: #E8703C; }
+  .nav-icon svg { width: 21px; height: 21px; display: block; }
+  .nav-item.scan-item { position: relative; top: -14px; }
+  .scan-btn-fab { width: 50px; height: 50px; border-radius: 50%; background: linear-gradient(135deg, #C7511F, #E8703C); display: flex; align-items: center; justify-content: center; box-shadow: 0 6px 18px rgba(199,81,31,0.5); margin-bottom: 3px; }
+  .scan-btn-fab svg { width: 22px; height: 22px; }
+</style>
+</head>
+<body>
+  <div class="glow glow-1"></div>
+
+  <div class="wrap">
+    <div class="logo">fork<span>it</span></div>
+
+    <div class="profile-header">
+      <div class="profile-avatar" id="avatarChip">?</div>
+      <div>
+        <div class="profile-name" id="profileName">—</div>
+        <div class="profile-sub">This is how friends see you on shared splits</div>
+      </div>
+    </div>
+
+    <div class="section-title">your name</div>
+    <input id="nameInput" placeholder="Your name" />
+
+    <div class="section-title">how you get paid back</div>
+    <label>Venmo username</label>
+    <input id="venmoInput" placeholder="SamOrtiz" />
+    <label>PayPal.me username</label>
+    <input id="paypalInput" placeholder="samortiz" />
+    <label>Phone (for text/Zelle)</label>
+    <input id="phoneInput" placeholder="+1 555 123 4567" />
+
+    <button class="btn" onclick="save()">Save changes</button>
+    <div class="saved-note" id="savedNote">Saved ✓</div>
+  </div>
+
+  <div class="bottom-nav">
+    <div class="nav-inner">
+      <a class="nav-item" href="/home.html">
+        <div class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="21" height="21"><path d="M3 11l9-8 9 8"/><path d="M5 10v10a1 1 0 0 0 1 1h4v-6h4v6h4a1 1 0 0 0 1-1V10"/></svg></div>
+        <div>Home</div>
+      </a>
+      <a class="nav-item" href="/history.html">
+        <div class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="21" height="21"><path d="M6 2h12v19l-3-2-3 2-3-2-3 2V2z"/><line x1="9" y1="7" x2="15" y2="7"/><line x1="9" y1="11" x2="15" y2="11"/></svg></div>
+        <div>History</div>
+      </a>
+      <a class="nav-item scan-item" href="/scan.html">
+        <div class="scan-btn-fab"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" width="22" height="22"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></div>
+      </a>
+      <a class="nav-item" href="/friends.html">
+        <div class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="21" height="21"><circle cx="8.5" cy="7" r="3.2"/><path d="M2.5 20c0-3.5 2.7-6 6-6s6 2.5 6 6"/><circle cx="17" cy="8.5" r="2.6"/><path d="M15 20c.1-2.6 2-4.5 4.6-4.5"/></svg></div>
+        <div>Friends</div>
+      </a>
+      <a class="nav-item active" href="/account.html">
+        <div class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="21" height="21"><circle cx="12" cy="12" r="3"/><path d="M19.4 13a7.9 7.9 0 0 0 0-2l2-1.6-2-3.4-2.4.9a7.7 7.7 0 0 0-1.7-1L15 3h-4l-.3 2.9a7.7 7.7 0 0 0-1.7 1l-2.4-.9-2 3.4L6.6 11a7.9 7.9 0 0 0 0 2l-2 1.6 2 3.4 2.4-.9c.5.4 1.1.75 1.7 1L11 21h4l.3-2.9c.6-.25 1.2-.6 1.7-1l2.4.9 2-3.4-2-1.6z"/></svg></div>
+        <div>Account</div>
+      </a>
+    </div>
+  </div>
+
+  <script>
+    const name = localStorage.getItem('split_user_name');
+    if (!name) window.location.href = '/';
+
+    document.getElementById('nameInput').value = name || '';
+    document.getElementById('venmoInput').value = localStorage.getItem('split_payerVenmo') || '';
+    document.getElementById('paypalInput').value = localStorage.getItem('split_payerPaypal') || '';
+    document.getElementById('phoneInput').value = localStorage.getItem('split_payerPhone') || '';
+
+    function refreshHeader() {
+      const n = document.getElementById('nameInput').value.trim() || 'You';
+      document.getElementById('profileName').textContent = n;
+      document.getElementById('avatarChip').textContent = n.split(/\s+/).map(w => w[0]).join('').slice(0, 2).toUpperCase();
+    }
+    refreshHeader();
+
+    function save() {
+      const newName = document.getElementById('nameInput').value.trim();
+      if (newName) localStorage.setItem('split_user_name', newName);
+      localStorage.setItem('split_payerVenmo', document.getElementById('venmoInput').value.trim());
+      localStorage.setItem('split_payerPaypal', document.getElementById('paypalInput').value.trim());
+      localStorage.setItem('split_payerPhone', document.getElementById('phoneInput').value.trim());
+
+      refreshHeader();
+      const note = document.getElementById('savedNote');
+      note.classList.add('show');
+      setTimeout(() => note.classList.remove('show'), 1600);
+    }
+  </script>
+</body>
+</html>

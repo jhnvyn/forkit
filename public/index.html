@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="manifest" href="/manifest.json" />
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+  <link rel="icon" href="/favicon.png" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Forkit" />
+  <meta name="theme-color" content="#17161A" />
+<title>Forkit</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap');
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Inter', sans-serif;
+    background: #17161A;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 24px 16px;
+    color: #FBF9F4;
+    position: relative;
+    overflow-x: hidden;
+  }
+  @keyframes drift {
+    0%   { transform: translate(0px, 0px) scale(1); }
+    50%  { transform: translate(24px, 28px) scale(1.08); }
+    100% { transform: translate(-16px, -12px) scale(0.95); }
+  }
+  .glow { position: fixed; border-radius: 50%; filter: blur(70px); pointer-events: none; z-index: 0; }
+  .glow-1 { width: 512px; height: 512px; top: -100px; right: -100px; background: radial-gradient(circle, #C7511F 0%, transparent 70%); opacity: 0.55; animation: drift 22s ease-in-out infinite alternate; }
+  .glow-2 { width: 448px; height: 448px; bottom: -80px; left: -100px; background: radial-gradient(circle, #8E5FB0 0%, transparent 70%); opacity: 0.35; animation: drift 27s ease-in-out infinite alternate-reverse; }
+  .screen { width: 100%; max-width: 380px; text-align: center; position: relative; z-index: 1; }
+  .logo {
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 700;
+    font-size: 17px;
+    color: #FBF9F4;
+    margin-bottom: 36px;
+  }
+  .logo span { color: #C7511F; }
+
+  .headline {
+    font-size: 26px;
+    font-weight: 800;
+    line-height: 1.25;
+    margin-bottom: 28px;
+    letter-spacing: -0.01em;
+  }
+
+  .proof-stack { display: flex; flex-direction: column; gap: 10px; margin-bottom: 36px; }
+
+  .proof-card {
+    background: #232320;
+    border: 1px solid #34342F;
+    border-radius: 14px;
+    padding: 12px 14px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    text-align: left;
+  }
+
+  .proof-icon {
+    width: 34px; height: 34px; border-radius: 10px; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px;
+  }
+  .proof-icon.pay { background: #2F6F4E22; }
+  .proof-icon.scan { background: #C7511F22; }
+
+  .proof-text { font-size: 13.5px; color: #D8D2C2; line-height: 1.4; }
+  .proof-text b { color: #FBF9F4; }
+  .proof-amount { color: #6FCF97; font-weight: 700; }
+
+  .qr-thumb {
+    width: 34px; height: 34px; border-radius: 6px; flex-shrink: 0;
+    background: #fff; padding: 3px;
+  }
+  .qr-thumb img { width: 100%; height: 100%; display: block; }
+
+  .cta {
+    width: 100%;
+    background: linear-gradient(90deg, #C7511F, #E8703C);
+    color: #fff;
+    border: none;
+    border-radius: 999px;
+    padding: 15px;
+    font-size: 15.5px;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: 'Inter', sans-serif;
+  }
+
+  .name-step { display: none; }
+  .name-step.show { display: block; }
+  .proof-stack.hide, .headline.hide, .cta.hide { display: none; }
+
+  .name-step input {
+    width: 100%;
+    background: #232320;
+    border: 1.5px solid #34342F;
+    border-radius: 12px;
+    padding: 14px;
+    font-size: 15px;
+    color: #FBF9F4;
+    outline: none;
+    margin-bottom: 12px;
+    font-family: 'Inter', sans-serif;
+  }
+  .name-step input::placeholder { color: #6B6759; }
+  .name-step input:focus { border-color: #C7511F; }
+
+  .name-sub { font-size: 13px; color: #8A8375; margin-bottom: 20px; }
+</style>
+</head>
+<body>
+  <div class="glow glow-1"></div>
+  <div class="glow glow-2"></div>
+  <div class="screen">
+    <div class="logo">fork<span>it</span></div>
+
+    <div id="intro">
+      <div class="headline">Split bills instantly<br/>and get paid back</div>
+
+      <div class="proof-stack">
+        <div class="proof-card">
+          <div class="proof-icon pay">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#6FCF97" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="17" height="17">
+              <line x1="12" y1="1" x2="12" y2="23"/>
+              <path d="M17 5.5c0-1.9-2.2-3.5-5-3.5s-5 1.6-5 3.5 2.2 3 5 3.5 5 1.6 5 3.5-2.2 3.5-5 3.5-5-1.6-5-3.5"/>
+            </svg>
+          </div>
+          <div class="proof-text"><b>Jake</b> just paid you <span class="proof-amount">$27.11</span> for dinner</div>
+        </div>
+        <div class="proof-card">
+          <div class="qr-thumb"><img src="https://api.qrserver.com/v1/create-qr-code/?size=80x80&data=split.app/demo" alt="" /></div>
+          <div class="proof-text">Friends just <b>scan the code</b> — no app download needed</div>
+        </div>
+      </div>
+
+      <button class="cta" onclick="showNameStep()">Get started</button>
+    </div>
+
+    <div id="nameStep" class="name-step">
+      <div class="headline" style="font-size:22px; margin-bottom:6px;">What's your name?</div>
+      <div class="name-sub">So friends know who to pay back</div>
+      <input id="nameInput" placeholder="Your name" autofocus />
+      <button class="cta" onclick="finishSignup()">Continue</button>
+    </div>
+  </div>
+
+  <script>
+    function showNameStep() {
+      document.getElementById('intro').style.display = 'none';
+      document.getElementById('nameStep').classList.add('show');
+      document.getElementById('nameInput').focus();
+    }
+
+    function finishSignup() {
+      const name = document.getElementById('nameInput').value.trim();
+      if (!name) {
+        document.getElementById('nameInput').style.borderColor = '#B8402A';
+        return;
+      }
+      localStorage.setItem('split_user_name', name);
+      window.location.href = '/home.html';
+    }
+
+    // Skip straight to home if they've already signed up before
+    if (localStorage.getItem('split_user_name')) {
+      window.location.href = '/home.html';
+    }
+  </script>
+</body>
+</html>

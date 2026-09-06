@@ -1,0 +1,4 @@
+node_modules/
+tabsplit.json
+tabsplit.db
+*.log

@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="manifest" href="/manifest.json" />
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+  <link rel="icon" href="/favicon.png" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Forkit" />
+  <meta name="theme-color" content="#17161A" />
+<title>Forkit — scan receipt</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap');
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Inter', sans-serif; background: #17161A; min-height: 100vh;
+    display: flex; justify-content: center; align-items: center; padding: 24px 16px; color: #FBF9F4;
+    position: relative; overflow: hidden;
+  }
+    @keyframes drift {
+    0%   { transform: translate(0px, 0px) scale(1); }
+    50%  { transform: translate(24px, 28px) scale(1.08); }
+    100% { transform: translate(-16px, -12px) scale(0.95); }
+  }
+  @keyframes driftCenter {
+    0%   { transform: translate(-50%, -50%) scale(1); }
+    50%  { transform: translate(calc(-50% + 18px), calc(-50% + 20px)) scale(1.1); }
+    100% { transform: translate(calc(-50% - 12px), calc(-50% - 10px)) scale(0.92); }
+  }
+.glow {
+    position: fixed; border-radius: 50%; filter: blur(70px); pointer-events: none; z-index: 0;
+  }
+  .glow-1 {
+    width: 540px; height: 540px; top: -80px; left: -100px;
+    background: radial-gradient(circle, #C7511F 0%, transparent 70%);
+    opacity: 0.55; animation: drift 22s ease-in-out infinite alternate;
+  }
+  .glow-2 {
+    width: 480px; height: 480px; bottom: -100px; right: -80px;
+    background: radial-gradient(circle, #E8703C 0%, transparent 70%);
+    opacity: 0.35; animation: drift 27s ease-in-out infinite alternate-reverse;
+  }
+  .glow-3 {
+    width: 350px; height: 350px; top: 40%; left: 50%; transform: translate(-50%, -50%);
+    background: radial-gradient(circle, #8E5FB0 0%, transparent 70%);
+    opacity: 0.28; animation: driftCenter 19s ease-in-out infinite alternate;
+  }
+  .screen { width: 100%; max-width: 380px; text-align: center; position: relative; z-index: 1; }
+  .logo { font-family: 'JetBrains Mono', monospace; font-weight: 700; font-size: 17px; margin-bottom: 30px; }
+  .logo span { color: #C7511F; }
+
+  .frame {
+    width: 190px; height: 240px; margin: 0 auto 24px;
+    border-radius: 16px;
+    display: flex; align-items: center; justify-content: center;
+    position: relative; background: rgba(35,35,32,0.6);
+    backdrop-filter: blur(6px);
+    box-shadow: 0 20px 50px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.06);
+  }
+  .frame svg.receipt-icon { opacity: 0.75; }
+
+  .bracket { position: absolute; width: 26px; height: 26px; }
+  .bracket svg { width: 100%; height: 100%; }
+  .bracket.tl { top: 10px; left: 10px; }
+  .bracket.tr { top: 10px; right: 10px; transform: scaleX(-1); }
+  .bracket.bl { bottom: 10px; left: 10px; transform: scaleY(-1); }
+  .bracket.br { bottom: 10px; right: 10px; transform: scale(-1, -1); }
+
+  .scan-tick {
+    position: absolute; left: 14px; right: 14px; height: 2px;
+    background: linear-gradient(90deg, transparent, #C7511F, transparent);
+    top: 50%; opacity: 0; border-radius: 2px;
+  }
+  .scan-tick.active { animation: tick 1.6s ease-in-out infinite; }
+  @keyframes tick {
+    0% { top: 14px; opacity: 0; }
+    15% { opacity: 1; }
+    85% { opacity: 1; }
+    100% { top: calc(100% - 14px); opacity: 0; }
+  }
+
+  .headline { font-size: 22px; font-weight: 800; margin-bottom: 8px; }
+  .permission-note {
+    font-size: 13px; color: #A79F8D; line-height: 1.6; margin-bottom: 28px;
+    padding: 0 8px;
+  }
+
+  .btn-stack { display: flex; flex-direction: column; gap: 10px; }
+  .scan-btn {
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    width: 100%; padding: 15px; border-radius: 999px; border: none;
+    font-size: 15px; font-weight: 700; cursor: pointer; font-family: 'Inter', sans-serif;
+    transition: transform 0.12s ease;
+  }
+  .scan-btn:active { transform: scale(0.97); }
+  .scan-btn.primary { background: linear-gradient(90deg, #C7511F, #E8703C); color: #fff; }
+  .scan-btn.secondary { background: rgba(35,35,32,0.6); backdrop-filter: blur(6px); color: #FBF9F4; border: 1.5px solid rgba(255,255,255,0.12); }
+
+  .skip-link {
+    display: block; margin-top: 22px; font-size: 13px; color: #6B6759;
+    text-decoration: underline; cursor: pointer; background: none; border: none;
+    font-family: 'Inter', sans-serif;
+  }
+
+  .status { margin-top: 20px; font-size: 13px; color: #A79F8D; min-height: 18px; }
+  .status.error { color: #E08A6B; }
+  .status.success { color: #6FCF97; font-weight: 600; }
+
+  .spinner {
+    display: inline-block; width: 14px; height: 14px; border-radius: 50%;
+    border: 2px solid #4A4A42; border-top-color: #C7511F;
+    animation: spin 0.7s linear infinite; margin-right: 6px; vertical-align: -2px;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+</style>
+</head>
+<body>
+  <div class="glow glow-1"></div>
+  <div class="glow glow-2"></div>
+  <div class="glow glow-3"></div>
+  <div class="screen">
+    <div class="logo">fork<span>it</span></div>
+
+    <div class="frame" id="frame">
+      <div class="bracket tl"><svg viewBox="0 0 26 26"><path d="M2 14V6a4 4 0 0 1 4-4h8" stroke="#C7511F" stroke-width="2.5" fill="none" stroke-linecap="round"/></svg></div>
+      <div class="bracket tr"><svg viewBox="0 0 26 26"><path d="M2 14V6a4 4 0 0 1 4-4h8" stroke="#C7511F" stroke-width="2.5" fill="none" stroke-linecap="round"/></svg></div>
+      <div class="bracket bl"><svg viewBox="0 0 26 26"><path d="M2 14V6a4 4 0 0 1 4-4h8" stroke="#C7511F" stroke-width="2.5" fill="none" stroke-linecap="round"/></svg></div>
+      <div class="bracket br"><svg viewBox="0 0 26 26"><path d="M2 14V6a4 4 0 0 1 4-4h8" stroke="#C7511F" stroke-width="2.5" fill="none" stroke-linecap="round"/></svg></div>
+      <div class="scan-tick" id="scanTick"></div>
+      <svg class="receipt-icon" width="70" height="90" viewBox="0 0 70 90" fill="none">
+        <path d="M8 4h54v78l-7-5-7 5-7-5-7 5-7-5-7 5-7-5-5 5V4z" fill="#2A2A25" stroke="#4A4A42" stroke-width="2"/>
+        <line x1="16" y1="20" x2="54" y2="20" stroke="#4A4A42" stroke-width="2"/>
+        <line x1="16" y1="30" x2="54" y2="30" stroke="#4A4A42" stroke-width="2"/>
+        <line x1="16" y1="40" x2="40" y2="40" stroke="#4A4A42" stroke-width="2"/>
+        <line x1="16" y1="50" x2="46" y2="50" stroke="#4A4A42" stroke-width="2"/>
+      </svg>
+    </div>
+
+    <div class="headline">Snap the receipt</div>
+    <div class="permission-note">We'll ask for camera or photo access so we can read the items automatically — nothing is uploaded except the picture itself.</div>
+
+    <input type="file" id="cameraInput" accept="image/*" capture="environment" style="display:none" onchange="handleFile(this.files[0])" />
+    <input type="file" id="galleryInput" accept="image/*" style="display:none" onchange="handleFile(this.files[0])" />
+
+    <div class="btn-stack">
+      <button class="scan-btn primary" onclick="document.getElementById('cameraInput').click()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="18" height="18" style="vertical-align:-4px; margin-right:2px;"><path d="M3 8a2 2 0 0 1 2-2h2l1.5-2h7L17 6h2a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8z"/><circle cx="12" cy="13" r="4"/></svg>
+        Take a photo
+      </button>
+      <button class="scan-btn secondary" onclick="document.getElementById('galleryInput').click()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="18" height="18" style="vertical-align:-4px; margin-right:2px;"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
+        Choose from gallery
+      </button>
+    </div>
+
+    <button class="skip-link" onclick="skipScan()">Skip — I'll enter items manually</button>
+
+    <div class="status" id="status"></div>
+  </div>
+
+  <script src="/receipt-ocr.js"></script>
+  <script>
+    async function handleFile(file) {
+      if (!file) return;
+      const statusEl = document.getElementById('status');
+      const tickEl = document.getElementById('scanTick');
+      statusEl.className = 'status';
+      statusEl.innerHTML = '<span class="spinner"></span>Reading your receipt…';
+      tickEl.classList.add('active');
+
+      try {
+        const result = await runReceiptOCR(file);
+        tickEl.classList.remove('active');
+        if (result.items.length === 0) {
+          sessionStorage.setItem('scan_result', JSON.stringify(result)); // keep rawText even with no items
+          statusEl.className = 'status error';
+          statusEl.textContent = "Couldn't find items automatically — you'll see what we read on the next screen to add them yourself.";
+          setTimeout(() => goToCreate(), 2000);
+          return;
+        }
+        sessionStorage.setItem('scan_result', JSON.stringify(result));
+        statusEl.className = 'status success';
+        statusEl.textContent = `Found ${result.items.length} item${result.items.length === 1 ? '' : 's'} ✓`;
+        setTimeout(() => goToCreate(), 600);
+      } catch (err) {
+        tickEl.classList.remove('active');
+        statusEl.className = 'status error';
+        statusEl.textContent = 'Scan failed — check your connection, or enter items manually.';
+        setTimeout(() => goToCreate(), 1600);
+      }
+    }
+
+    function skipScan() {
+      sessionStorage.removeItem('scan_result');
+      goToCreate();
+    }
+
+    function goToCreate() {
+      window.location.href = '/create.html';
+    }
+  </script>
+</body>
+</html>

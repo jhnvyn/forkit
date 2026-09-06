@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="manifest" href="/manifest.json" />
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+  <link rel="icon" href="/favicon.png" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Forkit" />
+  <meta name="theme-color" content="#17161A" />
+<title>Forkit — waiting on the group</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap');
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Inter', sans-serif; background: #17161A; min-height: 100vh;
+    display: flex; justify-content: center; padding: 40px 16px; color: #F5F1E8;
+    position: relative; overflow-x: hidden;
+  }
+    @keyframes drift {
+    0%   { transform: translate(0px, 0px) scale(1); }
+    50%  { transform: translate(24px, 28px) scale(1.08); }
+    100% { transform: translate(-16px, -12px) scale(0.95); }
+  }
+  .glow { position: fixed; border-radius: 50%; filter: blur(70px); pointer-events: none; z-index: 0; }
+  .glow-1 { width: 512px; height: 512px; top: -100px; right: -100px; background: radial-gradient(circle, #C7511F 0%, transparent 70%); opacity: 0.55; animation: drift 22s ease-in-out infinite alternate; }
+  .glow-2 { width: 448px; height: 448px; bottom: -80px; left: -100px; background: radial-gradient(circle, #8E5FB0 0%, transparent 70%); opacity: 0.35; animation: drift 27s ease-in-out infinite alternate-reverse; }
+
+  .card { width: 100%; max-width: 420px; background: #201F1C; border-radius: 20px; overflow: hidden; box-shadow: 0 20px 50px rgba(0,0,0,0.45); position: relative; z-index: 1; border: 1px solid rgba(255,255,255,0.06); }
+  .card::before { content: ""; position: absolute; top: 0; left: 0; right: 0; height: 6px; background: repeating-linear-gradient(90deg, rgba(255,255,255,0.06) 0 10px, transparent 10px 20px); }
+  .header { padding: 26px 22px 4px; text-align: center; }
+  .logo { font-family: 'JetBrains Mono', monospace; font-weight: 700; font-size: 15px; color: #9C9587; }
+  .logo span { color: #C7511F; }
+  .title { margin-top: 12px; font-size: 17px; font-weight: 700; color: #F5F1E8; }
+  .subtitle { font-size: 13px; color: #9C9587; margin-top: 3px; }
+
+  .qr-block { text-align: center; padding: 20px 22px 4px; }
+  .qr-block img { border-radius: 14px; border: 1px solid rgba(255,255,255,0.1); }
+
+  .link-row { margin: 14px 22px 0; display: flex; gap: 8px; }
+  .link-box { flex: 1; background: rgba(255,255,255,0.04); border: 1.5px solid rgba(255,255,255,0.1); border-radius: 10px; padding: 10px 12px; font-size: 11.5px; color: #C9C2B3; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-family: 'JetBrains Mono', monospace; }
+  .copy-btn { background: linear-gradient(90deg, #C7511F, #E8703C); color: #fff; border: none; border-radius: 10px; padding: 0 16px; font-size: 12.5px; font-weight: 700; cursor: pointer; transition: transform 0.12s ease; }
+  .copy-btn:active { transform: scale(0.95); }
+  .save-note { margin: 8px 22px 0; font-size: 11px; color: #6B6759; text-align: center; line-height: 1.5; }
+
+  .progress-section { margin: 22px 22px 4px; padding-top: 18px; border-top: 1px dashed rgba(255,255,255,0.1); }
+  .progress-title { font-size: 11px; text-transform: lowercase; color: #6B6759; margin-bottom: 14px; text-align: center; letter-spacing: 0.03em; }
+  .progress-amt { text-align: center; font-family: 'JetBrains Mono', monospace; font-weight: 700; font-size: 22px; color: #F5F1E8; margin-bottom: 4px; }
+  .progress-amt.complete { color: #6FCF97; }
+  .progress-sub { text-align: center; font-size: 12px; color: #9C9587; margin-bottom: 18px; }
+
+  .complete-banner {
+    margin: 0 0 16px; padding: 14px; border-radius: 14px; text-align: center;
+    background: rgba(111,207,151,0.12); border: 1px solid rgba(111,207,151,0.3);
+    display: none;
+  }
+  .complete-banner.show { display: block; animation: popIn 0.4s ease; }
+  .complete-banner .emoji { font-size: 26px; margin-bottom: 4px; }
+  .complete-banner .msg { font-size: 14px; font-weight: 700; color: #6FCF97; }
+  @keyframes popIn {
+    0% { opacity: 0; transform: scale(0.9); }
+    60% { opacity: 1; transform: scale(1.03); }
+    100% { transform: scale(1); }
+  }
+
+  .people-list { display: flex; flex-direction: column; gap: 8px; padding: 0 0 6px; min-height: 40px; }
+  .person-row {
+    display: flex; align-items: center; gap: 12px; padding: 10px 12px; border-radius: 12px;
+    border: 1px solid rgba(255,255,255,0.06); background: rgba(255,255,255,0.02);
+    transition: background 0.3s ease, border-color 0.3s ease, transform 0.3s ease;
+  }
+  .person-row.paid {
+    background: rgba(111,207,151,0.10); border-color: rgba(111,207,151,0.35);
+  }
+  .avatar {
+    width: 38px; height: 38px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+    font-size: 13.5px; font-weight: 700; color: #fff; flex-shrink: 0; position: relative;
+    transition: opacity 0.3s ease;
+  }
+  .person-row:not(.paid) .avatar { opacity: 0.45; }
+  .person-row.paid .avatar { opacity: 1; }
+  .check-badge {
+    position: absolute; bottom: -2px; right: -2px; width: 16px; height: 16px; border-radius: 50%;
+    background: #6FCF97; border: 2px solid #201F1C; display: flex; align-items: center; justify-content: center;
+    font-size: 8.5px; color: #17161A; opacity: 0; transform: scale(0.5);
+    transition: opacity 0.25s ease, transform 0.25s ease;
+  }
+  .person-row.paid .check-badge { opacity: 1; transform: scale(1); }
+
+  .person-info { flex: 1; min-width: 0; }
+  .person-name { font-size: 13.5px; font-weight: 600; color: #6B6759; transition: color 0.3s ease; }
+  .person-row.paid .person-name { color: #F5F1E8; }
+  .person-amt { font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #6B6759; }
+  .person-row.paid .person-amt { color: #6FCF97; }
+
+  .status-tag { font-size: 10.5px; font-weight: 700; padding: 4px 10px; border-radius: 999px; letter-spacing: 0.02em; flex-shrink: 0; }
+  .status-tag.paid { background: rgba(111,207,151,0.18); color: #6FCF97; }
+  .status-tag.waiting { background: rgba(255,255,255,0.05); color: #6B6759; }
+
+  .empty-wait { text-align: center; color: #6B6759; font-size: 12.5px; padding: 14px 0; }
+
+  .done-section { padding: 22px; }
+  .done-btn { display: block; width: 100%; text-align: center; background: rgba(255,255,255,0.06); color: #F5F1E8; border: 1px solid rgba(255,255,255,0.1); border-radius: 999px; padding: 14px; font-size: 15px; font-weight: 600; cursor: pointer; text-decoration: none; }
+
+  .toast {
+    position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(12px);
+    background: #F5F1E8; color: #17161A; padding: 10px 18px; border-radius: 999px; font-size: 13px; font-weight: 700;
+    opacity: 0; pointer-events: none; transition: opacity 0.2s ease, transform 0.2s ease; z-index: 10;
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+</style>
+</head>
+<body>
+  <div class="glow glow-1"></div>
+  <div class="glow glow-2"></div>
+
+  <div class="card" id="card">
+    <div class="header">
+      <div class="logo">fork<span>it</span></div>
+      <div class="title" id="titleText">Loading…</div>
+      <div class="subtitle" id="subtitleText"></div>
+    </div>
+
+    <div class="qr-block">
+      <img id="qrImg" src="" alt="QR code" width="170" height="170" />
+    </div>
+    <div class="link-row">
+      <div class="link-box" id="linkBox"></div>
+      <button class="copy-btn" onclick="copyLink()">Copy</button>
+    </div>
+    <div class="save-note">Save this link — it still works even if your phone dies or you switch devices</div>
+
+    <div class="progress-section">
+      <div class="progress-title">who's paid you back</div>
+      <div class="complete-banner" id="completeBanner">
+        <div class="emoji">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#6FCF97" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="26" height="26" style="display:block; margin:0 auto;">
+            <circle cx="12" cy="12" r="9"/>
+            <path d="M8 12l3 3 5-6"/>
+          </svg>
+        </div>
+        <div class="msg">Everyone's paid up!</div>
+      </div>
+      <div class="progress-amt" id="progressAmt">$0.00</div>
+      <div class="progress-sub" id="progressSub"></div>
+      <div class="people-list" id="peopleList"></div>
+    </div>
+
+    <div class="done-section">
+      <a class="done-btn" href="/history.html">View my splits</a>
+    </div>
+  </div>
+
+  <div class="toast" id="toast">Link copied</div>
+
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const splitId = params.get('id');
+    let fullUrl = '';
+
+    if (!splitId) {
+      document.getElementById('titleText').textContent = 'No split found';
+    } else {
+      fullUrl = window.location.origin + '/s/' + splitId;
+      document.getElementById('qrImg').src = 'https://api.qrserver.com/v1/create-qr-code/?size=170x170&data=' + encodeURIComponent(fullUrl);
+      document.getElementById('linkBox').textContent = fullUrl;
+      poll();
+      setInterval(poll, 4000);
+    }
+
+    function computeAllTotals(items, taxTipRate) {
+      const byPerson = {};
+      items.forEach(item => {
+        item.claims.forEach(c => {
+          if (!byPerson[c.claimerSession]) byPerson[c.claimerSession] = { name: c.claimerName, subtotal: 0 };
+          byPerson[c.claimerSession].subtotal += item.price / item.claims.length;
+        });
+      });
+      Object.values(byPerson).forEach(p => {
+        p.taxTip = p.subtotal * taxTipRate;
+        p.total = p.subtotal + p.taxTip;
+      });
+      return byPerson;
+    }
+
+    const AVATAR_COLORS = ['#C7511F', '#3A6EA5', '#2F6F4E', '#B8860B', '#8E5FB0', '#C24C6E'];
+    function colorFor(name) {
+      let hash = 0;
+      for (let i = 0; i < name.length; i++) hash = name.charCodeAt(i) + ((hash << 5) - hash);
+      return AVATAR_COLORS[Math.abs(hash) % AVATAR_COLORS.length];
+    }
+    function initials(name) {
+      return name.trim().split(/\s+/).map(w => w[0]).join('').slice(0, 2).toUpperCase();
+    }
+
+    async function poll() {
+      try {
+        const res = await fetch('/api/splits/' + splitId);
+        if (!res.ok) return;
+        const { split, items, payments } = await res.json();
+
+        document.getElementById('titleText').textContent = split.restaurant_name;
+        document.getElementById('subtitleText').textContent = `$${(split.subtotal + split.tax_tip).toFixed(2)} total`;
+
+        const taxTipRate = split.subtotal > 0 ? split.tax_tip / split.subtotal : 0;
+        const allTotals = computeAllTotals(items, taxTipRate);
+        const people = Object.entries(allTotals).sort((a, b) => {
+          const aPaid = payments.some(p => p.claimerSession === a[0]);
+          const bPaid = payments.some(p => p.claimerSession === b[0]);
+          return aPaid === bPaid ? 0 : aPaid ? -1 : 1; // paid people float to top
+        });
+
+        const owed = people.reduce((sum, [sess, p]) => {
+          const paid = payments.some(pay => pay.claimerSession === sess);
+          return sum + (paid ? 0 : p.total);
+        }, 0);
+        const paidCount = people.filter(([sess]) => payments.some(p => p.claimerSession === sess)).length;
+        const allPaid = people.length > 0 && paidCount === people.length;
+
+        const banner = document.getElementById('completeBanner');
+        const amtEl = document.getElementById('progressAmt');
+        banner.classList.toggle('show', allPaid);
+        amtEl.classList.toggle('complete', allPaid);
+        amtEl.style.display = allPaid ? 'none' : 'block';
+
+        amtEl.textContent = `$${owed.toFixed(2)} still coming`;
+        document.getElementById('progressSub').textContent = people.length
+          ? `${paidCount} of ${people.length} paid you back`
+          : '';
+
+        const list = document.getElementById('peopleList');
+        if (people.length === 0) {
+          list.innerHTML = `<div class="empty-wait">Waiting for your friends to open the link…</div>`;
+        } else {
+          list.innerHTML = people.map(([sess, p]) => {
+            const isPaid = payments.some(pay => pay.claimerSession === sess);
+            return `
+              <div class="person-row ${isPaid ? 'paid' : ''}">
+                <div class="avatar" style="background:${colorFor(p.name)}">
+                  ${initials(p.name)}
+                  <div class="check-badge">✓</div>
+                </div>
+                <div class="person-info">
+                  <div class="person-name">${p.name}</div>
+                  <div class="person-amt">$${p.total.toFixed(2)}</div>
+                </div>
+                <div class="status-tag ${isPaid ? 'paid' : 'waiting'}">${isPaid ? 'paid' : 'waiting'}</div>
+              </div>
+            `;
+          }).join('');
+        }
+      } catch (e) {
+        // silent — will retry on next poll
+      }
+    }
+
+    function copyLink() {
+      if (navigator.clipboard && window.isSecureContext) {
+        navigator.clipboard.writeText(fullUrl).then(showCopiedToast);
+        return;
+      }
+      // Fallback for plain http:// (non-localhost) pages, where the modern
+      // clipboard API is blocked by the browser for security reasons.
+      const temp = document.createElement('textarea');
+      temp.value = fullUrl;
+      temp.style.position = 'fixed';
+      temp.style.opacity = '0';
+      document.body.appendChild(temp);
+      temp.focus();
+      temp.select();
+      try {
+        document.execCommand('copy');
+        showCopiedToast();
+      } catch (e) {
+        alert('Could not copy automatically — long-press the link text above to copy it manually.');
+      }
+      document.body.removeChild(temp);
+    }
+
+    function showCopiedToast() {
+      const t = document.getElementById('toast');
+      t.classList.add('show');
+      setTimeout(() => t.classList.remove('show'), 1500);
+    }
+  </script>
+</body>
+</html>

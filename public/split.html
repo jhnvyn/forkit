@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="manifest" href="/manifest.json" />
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+  <link rel="icon" href="/favicon.png" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Forkit" />
+  <meta name="theme-color" content="#17161A" />
+<title>Forkit</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap');
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Inter', sans-serif; background: #17161A; min-height: 100vh; display: flex; justify-content: center; padding: 40px 16px; color: #F5F1E8; position: relative; overflow-x: hidden; }
+  .card { width: 100%; max-width: 400px; background: #201F1C; border-radius: 20px; overflow: hidden; box-shadow: 0 20px 50px rgba(0,0,0,0.45); position: relative; z-index: 1; border: 1px solid rgba(255,255,255,0.06); }
+  .card::before { content: ""; position: absolute; top: 0; left: 0; right: 0; height: 6px; background: repeating-linear-gradient(90deg, rgba(255,255,255,0.06) 0 10px, transparent 10px 20px); }
+  .header { padding: 26px 22px 4px; text-align: center; }
+  .logo { font-family: 'JetBrains Mono', monospace; font-weight: 700; font-size: 15px; color: #9C9587; }
+  .logo span { color: #C7511F; }
+  .from-line { margin-top: 14px; font-size: 14px; color: #C9C2B3; line-height: 1.5; }
+  .from-line b { color: #F5F1E8; font-weight: 600; }
+  .instructions { margin: 16px 22px 4px; padding: 10px 12px; background: rgba(232,163,66,0.1); border-radius: 10px; font-size: 12.5px; color: #E8A342; text-align: center; line-height: 1.5; }
+  .name-gate { padding: 20px 22px; }
+  .name-gate input { width: 100%; border: 1.5px solid rgba(255,255,255,0.12); border-radius: 10px; padding: 12px; font-size: 14px; background: rgba(255,255,255,0.04); color: #F5F1E8; outline: none; margin-bottom: 10px; }
+  .name-gate button { width: 100%; background: linear-gradient(90deg, #C7511F, #E8703C); color: #fff; border: none; border-radius: 999px; padding: 13px; font-size: 14.5px; font-weight: 700; cursor: pointer; }
+  .items { padding: 14px 16px 6px; display: flex; flex-direction: column; gap: 8px; }
+  .item { display: flex; align-items: center; justify-content: space-between; padding: 12px 14px; background: rgba(255,255,255,0.03); border: 1.5px solid rgba(255,255,255,0.08); border-radius: 12px; cursor: pointer; transition: background 0.2s ease, border-color 0.2s ease; }
+  .item.selected { border-color: #6FCF97; background: rgba(111,207,151,0.10); }
+  .item-left { display: flex; align-items: center; gap: 10px; }
+  .checkbox { width: 20px; height: 20px; border-radius: 6px; border: 1.5px solid rgba(255,255,255,0.2); flex-shrink: 0; display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,0.04); }
+  .item.selected .checkbox { background: #2F6F4E; border-color: #6FCF97; }
+  .checkbox svg { display: none; width: 12px; height: 12px; }
+  .item.selected .checkbox svg { display: block; }
+  .item-name { font-size: 14px; font-weight: 600; color: #F5F1E8; }
+  .item-sub { font-size: 11.5px; color: #9C9587; margin-top: 1px; }
+  .item-price { font-family: 'JetBrains Mono', monospace; font-size: 13.5px; font-weight: 600; color: #F5F1E8; }
+  .summary { margin: 14px 22px 0; padding-top: 14px; border-top: 1px dashed rgba(255,255,255,0.1); }
+  .sum-line { display: flex; justify-content: space-between; font-size: 13px; color: #9C9587; padding: 3px 0; }
+  .sum-line span:last-child { font-family: 'JetBrains Mono', monospace; }
+  .sum-line.total { margin-top: 6px; padding-top: 8px; border-top: 1px solid rgba(255,255,255,0.1); font-weight: 700; color: #F5F1E8; font-size: 15px; }
+  .pay-section { padding: 18px 22px 20px; display: flex; flex-direction: column; gap: 9px; }
+  .pay-btn { display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; padding: 14px; border-radius: 999px; border: none; font-size: 14.5px; font-weight: 600; cursor: pointer; text-decoration: none; }
+  .pay-btn.disabled { opacity: 0.4; pointer-events: none; }
+  .pay-btn.venmo { background: #3D95CE; color: #fff; }
+  .pay-btn.paypal { background: #1C3F94; color: #fff; }
+  .pay-btn.zelle { background: rgba(255,255,255,0.05); color: #F5F1E8; border: 1.5px solid rgba(255,255,255,0.12); }
+  .pay-btn.confirm { background: rgba(111,207,151,0.1); color: #6FCF97; border: 1.5px solid rgba(111,207,151,0.35); font-size: 13px; padding: 10px; }
+  .zelle-note { font-size: 11px; color: #6B6759; text-align: center; margin-top: -2px; }
+  .loading { padding: 40px; text-align: center; color: #9C9587; font-size: 13px; }
+  .paid-banner { margin: 18px 22px 0; padding: 12px 14px; background: rgba(111,207,151,0.1); border: 1px solid rgba(111,207,151,0.3); border-radius: 12px; text-align: center; font-size: 13.5px; font-weight: 600; color: #6FCF97; }
+  .group-status { margin: 20px 22px 4px; padding-top: 14px; border-top: 1px dashed rgba(255,255,255,0.1); }
+  .group-title { font-size: 11px; text-transform: lowercase; color: #6B6759; margin-bottom: 10px; }
+  .group-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; }
+  .group-name { font-size: 13.5px; font-weight: 600; color: #F5F1E8; }
+  .group-amt { font-family: 'JetBrains Mono', monospace; font-size: 13px; color: #9C9587; margin-left: 6px; }
+  .group-badge { font-size: 11px; font-weight: 700; padding: 4px 9px; border-radius: 999px; }
+  .group-badge.paid { background: rgba(111,207,151,0.15); color: #6FCF97; }
+  .group-badge.unpaid { background: rgba(224,138,107,0.15); color: #E08A6B; }
+  .cover-btn { font-size: 11.5px; font-weight: 700; color: #E8703C; background: none; border: none; cursor: pointer; padding: 4px 0 0; }
+  @keyframes drift {
+    0%   { transform: translate(0px, 0px) scale(1); }
+    50%  { transform: translate(24px, 28px) scale(1.08); }
+    100% { transform: translate(-16px, -12px) scale(0.95); }
+  }
+  .glow { position: fixed; border-radius: 50%; filter: blur(70px); pointer-events: none; z-index: 0; }
+  .glow-1 { width: 512px; height: 512px; top: -100px; right: -100px; background: radial-gradient(circle, #C7511F 0%, transparent 70%); opacity: 0.55; animation: drift 22s ease-in-out infinite alternate; }
+  .glow-2 { width: 448px; height: 448px; bottom: -80px; left: -100px; background: radial-gradient(circle, #8E5FB0 0%, transparent 70%); opacity: 0.35; animation: drift 27s ease-in-out infinite alternate-reverse; }
+</style>
+</head>
+<body>
+  <div class="glow glow-1"></div>
+  <div class="glow glow-2"></div>
+  <div class="card" id="card">
+    <div class="header">
+      <div class="logo">fork<span>it</span></div>
+      <div class="from-line" id="fromLine">Loading…</div>
+    </div>
+    <div class="loading" id="loading">Fetching split…</div>
+  </div>
+
+  <script>
+    const splitId = window.location.pathname.split('/s/')[1];
+    const SESSION_KEY = 'tabsplit_session';
+    let session = localStorage.getItem(SESSION_KEY);
+    if (!session) {
+      session = Math.random().toString(36).slice(2) + Date.now();
+      localStorage.setItem(SESSION_KEY, session);
+    }
+    let myName = localStorage.getItem('tabsplit_name_' + splitId) || localStorage.getItem('split_user_name') || '';
+
+    let state = null;
+
+    async function load() {
+      const res = await fetch('/api/splits/' + splitId);
+      if (!res.ok) {
+        document.getElementById('loading').textContent = "Couldn't find this split.";
+        return;
+      }
+      state = await res.json();
+      render();
+    }
+
+    // Compute subtotal/tax-tip/total for every unique person who's claimed something
+    function computeAllTotals(items, taxTipRate) {
+      const byPerson = {}; // session -> { name, subtotal }
+      items.forEach(item => {
+        item.claims.forEach(c => {
+          if (!byPerson[c.claimerSession]) byPerson[c.claimerSession] = { name: c.claimerName, subtotal: 0 };
+          byPerson[c.claimerSession].subtotal += item.price / item.claims.length;
+        });
+      });
+      Object.values(byPerson).forEach(p => {
+        p.taxTip = p.subtotal * taxTipRate;
+        p.total = p.subtotal + p.taxTip;
+      });
+      return byPerson;
+    }
+
+    function render() {
+      const { split, items, payments } = state;
+      document.getElementById('fromLine').innerHTML =
+        `<b>${split.payer_name}</b> covered the bill at <b>${split.restaurant_name}</b><br/>and split it up for the group`;
+
+      const card = document.getElementById('card');
+
+      if (!myName) {
+        card.innerHTML = card.querySelector('.header').outerHTML + `
+          <div class="name-gate">
+            <input id="nameInput" placeholder="Your name" />
+            <button onclick="setName()">Continue</button>
+          </div>
+        `;
+        return;
+      }
+
+      const taxTipRate = split.subtotal > 0 ? split.tax_tip / split.subtotal : 0;
+      const myClaimedItems = items.filter(i => i.claims.some(c => c.claimerSession === session));
+      const mySubtotal = myClaimedItems.reduce((s, i) => s + (i.price / i.claims.length), 0);
+      const myTaxTip = mySubtotal * taxTipRate;
+      const myTotal = mySubtotal + myTaxTip;
+      const hasSelection = myClaimedItems.length > 0;
+      const amt = myTotal.toFixed(2);
+      const myPayment = payments.find(p => p.claimerSession === session);
+
+      const itemsHtml = items.map(item => {
+        const selected = item.claims.some(c => c.claimerSession === session);
+        const others = item.claims.filter(c => c.claimerSession !== session).map(c => c.claimerName);
+        return `
+          <div class="item ${selected ? 'selected' : ''}" onclick="toggleItem('${item.id}')">
+            <div class="item-left">
+              <div class="checkbox"><svg viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-6" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+              <div>
+                <div class="item-name">${item.name}</div>
+                ${others.length ? `<div class="item-sub">also: ${others.join(', ')}</div>` : ''}
+              </div>
+            </div>
+            <div class="item-price">$${item.price.toFixed(2)}</div>
+          </div>
+        `;
+      }).join('');
+
+      const venmoLink = split.payer_venmo
+        ? `venmo://paycharge?txn=pay&recipients=${encodeURIComponent(split.payer_venmo)}&amount=${amt}&note=${encodeURIComponent(split.restaurant_name + ' split')}`
+        : null;
+      const paypalLink = split.payer_paypal
+        ? `https://paypal.me/${encodeURIComponent(split.payer_paypal)}/${amt}`
+        : null;
+
+      const payButtonsHtml = myPayment ? `
+        <div class="paid-banner">✓ You've paid ${split.payer_name} $${myPayment.amount.toFixed(2)}</div>
+      ` : `
+        <div class="pay-section">
+          <a class="pay-btn venmo ${hasSelection && venmoLink ? '' : 'disabled'}" href="${venmoLink || '#'}">Pay ${split.payer_name} on Venmo</a>
+          <a class="pay-btn paypal ${hasSelection && paypalLink ? '' : 'disabled'}" href="${paypalLink || '#'}" target="_blank" rel="noreferrer">Pay ${split.payer_name} on PayPal</a>
+          <button class="pay-btn zelle ${hasSelection ? '' : 'disabled'}" onclick="zelleInfo('${amt}', '${split.payer_name}')">Pay ${split.payer_name} with Zelle</button>
+          <div class="zelle-note">Zelle doesn't support pre-filled links — this opens instructions to send it from your banking app</div>
+          <button class="pay-btn confirm ${hasSelection ? '' : 'disabled'}" onclick="markPaid()">I've sent it — mark as paid</button>
+        </div>
+      `;
+
+      // Everyone else in the split besides the payer, with their totals + paid status
+      const allTotals = computeAllTotals(items, taxTipRate);
+      const othersHtml = Object.entries(allTotals)
+        .filter(([sess]) => sess !== session)
+        .map(([sess, p]) => {
+          const payment = payments.find(pay => pay.claimerSession === sess);
+          const badge = payment
+            ? `<span class="group-badge paid">paid${payment.covered ? ' by ' + payment.paidByName : ''}</span>`
+            : `<span class="group-badge unpaid">unpaid</span>`;
+          const coverBtn = !payment
+            ? `<div><button class="cover-btn" onclick="coverFor('${sess}', '${p.name.replace(/'/g, "\\'")}', ${p.total.toFixed(2)})">cover $${p.total.toFixed(2)} for them</button></div>`
+            : '';
+          return `
+            <div class="group-row">
+              <div class="group-name">${p.name} <span class="group-amt">$${p.total.toFixed(2)}</span></div>
+              <div>${badge}</div>
+            </div>
+            ${coverBtn}
+          `;
+        }).join('');
+
+      card.innerHTML = card.querySelector('.header').outerHTML + `
+        <div class="instructions">Tap everything that was yours — your total updates below</div>
+        <div class="items">${itemsHtml}</div>
+        <div class="summary">
+          <div class="sum-line"><span>Your subtotal</span><span>$${mySubtotal.toFixed(2)}</span></div>
+          <div class="sum-line"><span>Your share of tax &amp; tip</span><span>$${myTaxTip.toFixed(2)}</span></div>
+          <div class="sum-line total"><span>You owe ${split.payer_name}</span><span>$${amt}</span></div>
+        </div>
+        ${payButtonsHtml}
+        ${othersHtml ? `<div class="group-status"><div class="group-title">rest of the group</div>${othersHtml}</div>` : ''}
+      `;
+    }
+
+    function setName() {
+      const val = document.getElementById('nameInput').value.trim();
+      if (!val) return;
+      myName = val;
+      localStorage.setItem('tabsplit_name_' + splitId, val);
+      render();
+    }
+
+    async function toggleItem(itemId) {
+      await fetch('/api/items/' + itemId + '/claim', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ claimerName: myName, claimerSession: session }),
+      });
+      await load();
+    }
+
+    async function markPaid() {
+      const { split, items } = state;
+      const taxTipRate = split.subtotal > 0 ? split.tax_tip / split.subtotal : 0;
+      const myClaimedItems = items.filter(i => i.claims.some(c => c.claimerSession === session));
+      const mySubtotal = myClaimedItems.reduce((s, i) => s + (i.price / i.claims.length), 0);
+      const myTotal = mySubtotal + mySubtotal * taxTipRate;
+
+      await fetch('/api/splits/' + splitId + '/pay', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ claimerSession: session, claimerName: myName, amount: myTotal }),
+      });
+      await load();
+    }
+
+    async function coverFor(friendSession, friendName, amount) {
+      const confirmMsg = `Cover $${amount.toFixed(2)} for ${friendName}? Send that amount to ${state.split.payer_name} yourself, then confirm here.`;
+      if (!confirm(confirmMsg)) return;
+
+      await fetch('/api/splits/' + splitId + '/pay', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ claimerSession: friendSession, claimerName: friendName, amount, paidByName: myName }),
+      });
+      await load();
+    }
+
+    function zelleInfo(amt, payerName) {
+      alert(`Open your banking app, choose Zelle, and send $${amt} to ${payerName}'s phone number or email on file. Zelle doesn't allow apps to pre-fill this step.`);
+    }
+
+    load();
+  </script>
+</body>
+</html>
